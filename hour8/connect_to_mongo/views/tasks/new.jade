@@ -1,0 +1,14 @@
+extends ../layout
+
+block content
+  h1 Create a task
+  form(method='post')
+    fieldset
+      legend Add a task
+     div.clearfix
+        label Task
+        div.input
+          input(name='task[task]', class='xlarge')
+      div.actions
+        input.btn.primary(type='submit', value='Save')
+        input.btn(type='reset', value='Cancel')

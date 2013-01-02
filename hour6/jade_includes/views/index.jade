@@ -1,0 +1,14 @@
+extends layout
+
+mixin users(users)
+  ol
+    each user in users
+      li= user
+
+block content
+  h1 Jade Includes Example
+  - users = ["Alice", "Bob", "Christa"]
+  mixin users(users)
+  - more_users = ["Dylan", "Ed", "Frank"]
+  mixin users(more_users)
+  include includes/footer

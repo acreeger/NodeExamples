@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  h1= title
+  if (user)
+    p Name #{user.first_name} #{user.surname}
+    p Address #{user.address}
+  else
+    p No user with an id of #{id} was found.
