@@ -2,6 +2,9 @@ extends ../layout
 
 block content
   h1 Edit Task
+  if (typeof flash !== 'undefined')
+    include ../mixins/flash-messages
+    mixin flash-messages(flash)
   form(method='post', action='/tasks/' + task.id)
     input(name='_method', value='PUT', type='hidden')
     fieldset
@@ -10,6 +13,9 @@ block content
         label Task
         div.input
           input.xlarge(name='task[task]',value='#{task.task}')
+        label Details
+        div.input
+          textarea(name='task[details]') #{task.details}
       div.actions
         input.btn.primary(type='submit', value='Save')
-        input.btn(type="reset", value="Cancel")
+        a.btn.primary(href='/tasks') Cancel

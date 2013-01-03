@@ -9,9 +9,12 @@ block content
     fieldset
       legend Add a task
      div.clearfix
-        label Task
-        div.input
-          input(name='task[task]', class='xlarge')
+      label Task
+      div.input
+        input.xlarge(name='task[task]')
+      label Details
+      div.input
+        textarea(name='task[details]')
       div.actions
         input.btn.primary(type='submit', value='Save')
-        input.btn(type='reset', value='Cancel')
+        a.btn.primary(href='/tasks') Cancel

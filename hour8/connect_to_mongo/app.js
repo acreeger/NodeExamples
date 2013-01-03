@@ -26,7 +26,19 @@ function validatePresenceOf(value) {
 var Schema = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
 
-var Task = mongoose.model('Task', new Schema({task: {type: String, validate: [validatePresenceOf, "Please enter a task name"]}}))
+var taskSchema = new Schema({
+    task: {
+      type: String,
+      validate: [validatePresenceOf, "Please enter a task name"]
+    },
+    details: {
+      type: String,
+      validate: [validatePresenceOf, "Please enter some details"] 
+    }
+  }
+)
+
+var Task = mongoose.model('Task', taskSchema)
 // var Task = mongoose.model('Task', new Schema({task: String}));
 // Task.schema.path("task").required(true);
 
@@ -66,8 +78,16 @@ app.get('/tasks/new', function(req, res) {
 });
 
 app.post('/tasks', function(req, res) {
-  var task = new Task(req.body.task);
+  console.log(req.body.task)
+  var task = new Task({
+    task : req.body.task.task,
+    details : req.body.task.details
+  });
+  console.log("In /tasks.post: task:", task)
+  console.log("In /tasks.post: task:.task", task.task)
+  console.log("In /tasks.post: task:.details", task.details)
   task.save(function(err) {
+    console.log("In save: err:",err);
     if (!err) {
       req.flash('info','Task created succesfully')
       res.redirect('/tasks');
@@ -84,7 +104,8 @@ app.get('/tasks/:id/edit', function(req, res) {
     if (doc) {
       res.render('tasks/edit', {
         title: 'Edit Task View',
-        task: doc
+        task: doc,
+        flash: req.flash()
       });      
     } else {
       req.flash('warning', "Could not find a task with an id of " + req.params.id);
@@ -96,12 +117,14 @@ app.get('/tasks/:id/edit', function(req, res) {
 app.put('/tasks/:id', function(req, res) {
   Task.findById(req.params.id, function(err, doc){
     doc.task = req.body.task.task;
+    doc.details = req.body.task.details;
     doc.save(function(err) {
       if (!err) {
         req.flash("info","Changes saved")
         res.redirect('/tasks');
       } else {
-        //req.flash('warning', err);
+        req.flash('warning', err);
+        res.redirect('/tasks/' + req.params.id + "/edit");
       }
     });
   });
