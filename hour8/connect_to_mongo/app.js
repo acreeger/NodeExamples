@@ -72,7 +72,6 @@ app.configure('development', function(){
 });
 
 app.get('/', routes.index);
-app.get('/users', user.list);
 app.get('/tasks', function(req, res) {
   Task.find({}, function(err, docs) {
     res.render('tasks/index',{title:"Your todos", docs:docs, flash: req.flash()})    
