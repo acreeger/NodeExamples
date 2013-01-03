@@ -18,10 +18,17 @@ mongoose.connect('mongodb://localhost/todo_development', function(err) {
     throw err;
   }
 });
+
+function validatePresenceOf(value) {
+  return value && value.length
+}
+
 var Schema = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
 
-var Task = mongoose.model('Task', new Schema({task: String}))
+var Task = mongoose.model('Task', new Schema({task: {type: String, validate: [validatePresenceOf, "Please enter a task name"]}}))
+// var Task = mongoose.model('Task', new Schema({task: String}));
+// Task.schema.path("task").required(true);
 
 var app = express();
 
@@ -47,19 +54,18 @@ app.configure('development', function(){
 app.get('/', routes.index);
 app.get('/users', user.list);
 app.get('/tasks', function(req, res) {
-  var flash = req.flash()
-  console.log("req.flash", flash)
-
   Task.find({}, function(err, docs) {
-    res.render('tasks/index',{title:"Your todos", docs:docs, flash: flash})    
+    res.render('tasks/index',{title:"Your todos", docs:docs, flash: req.flash()})    
   });
 });
 
 app.get('/tasks/new', function(req, res) {
-  res.render('tasks/new', {title: "New Task"})
+  var flash = req.flash();
+  console.log("/tasks/new: Got flash:",flash)
+  res.render('tasks/new', {title: "New Task", flash: flash})
 });
 
-app.post('/tasks/new', function(req, res) {
+app.post('/tasks', function(req, res) {
   var task = new Task(req.body.task);
   task.save(function(err) {
     if (!err) {
@@ -67,11 +73,12 @@ app.post('/tasks/new', function(req, res) {
       res.redirect('/tasks');
     }
     else {
-      //req.flash('warning', err);
-      res.render('tasks/new', {title: "New Task",error:err})
+      req.flash('warning', err);
+      res.redirect('/tasks/new')
     }
   });
 });
+
 app.get('/tasks/:id/edit', function(req, res) {
   Task.findById(req.params.id, function(err, doc) {
     if (doc) {
@@ -80,11 +87,12 @@ app.get('/tasks/:id/edit', function(req, res) {
         task: doc
       });      
     } else {
-      //req.flash('warning', "Could not find a task with an id of " + req.params.id);
+      req.flash('warning', "Could not find a task with an id of " + req.params.id);
       res.redirect('/tasks');
     }
   });
 });
+
 app.put('/tasks/:id', function(req, res) {
   Task.findById(req.params.id, function(err, doc){
     doc.task = req.body.task.task;
@@ -98,6 +106,7 @@ app.put('/tasks/:id', function(req, res) {
     });
   });
 });
+
 app.del('/tasks/:id', function(req, res, next) {
   Task.findById(req.params.id, function(err, doc){
     if (!doc) {

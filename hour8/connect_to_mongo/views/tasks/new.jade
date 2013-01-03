@@ -2,7 +2,10 @@ extends ../layout
 
 block content
   h1 Create a task
-  form(method='post')
+  if (typeof flash !== 'undefined')
+    include ../mixins/flash-messages
+    mixin flash-messages(flash)
+  form(method='post',action="/tasks")
     fieldset
       legend Add a task
      div.clearfix

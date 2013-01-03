@@ -1,7 +1,15 @@
 mixin flash-messages(flash)
   if (typeof flash !== 'undefined')
     if (flash.warning)
-      div.alert-message.warning: p= flash.warning
+      - console.log("FROM TPL: flash.warning[0]",flash.warning[0])
+      if (flash.warning && flash.warning[0].errors)
+        - console.log("FROM TPL: flash.warning[0].errors",flash.warning[0].errors)
+        div.alert-message.warning
+          each value, key in flash.warning[0].errors
+            - console.log("FROM TPL: key, value:",key, value)
+            p= value.type
+      else
+        div.alert-message.warning: p= flash.warning
     else if (flash.info)
       div(data-alert='alert').alert-message.success: p= flash.info
  
