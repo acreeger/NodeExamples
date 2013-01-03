@@ -7,15 +7,5 @@ block content
     mixin flash-messages(flash)
   form(method='post', action='/tasks/' + task.id)
     input(name='_method', value='PUT', type='hidden')
-    fieldset
-      legend Editing task
-      div.clearfix
-        label Task
-        div.input
-          input.xlarge(name='task[task]',value='#{task.task}')
-        label Details
-        div.input
-          textarea(name='task[details]') #{task.details}
-      div.actions
-        input.btn.primary(type='submit', value='Save')
-        a.btn.primary(href='/tasks') Cancel
+    include ../mixins/task-fields
+    mixin task-fields(task, 'Edit a task')

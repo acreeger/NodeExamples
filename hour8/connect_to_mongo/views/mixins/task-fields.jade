@@ -1,0 +1,13 @@
+mixin task-fields(task, title)
+  fieldset
+    legend= title
+    div.clearfix
+      label Task
+      div.input
+        input.xlarge(name='task[task]',value='#{task.task}')
+      label Details
+      div.input
+        textarea(name='task[details]') #{task.details}
+    div.actions
+      input.btn.primary(type='submit', value='Save')
+      a.btn.primary(href='/tasks') Cancel

@@ -19,6 +19,14 @@ mongoose.connect('mongodb://localhost/todo_development', function(err) {
   }
 });
 
+function createTask(name, details) {
+  var task = new Task({
+    task : name,
+    details : details
+  });
+  return task;
+}
+
 function validatePresenceOf(value) {
   return value && value.length
 }
@@ -72,20 +80,15 @@ app.get('/tasks', function(req, res) {
 });
 
 app.get('/tasks/new', function(req, res) {
+  var newTask = req.flash('newTask')[0] || createTask('', '');
+  console.log("newTask:", newTask);
   var flash = req.flash();
   console.log("/tasks/new: Got flash:",flash)
-  res.render('tasks/new', {title: "New Task", flash: flash})
+  res.render('tasks/new', {title: "New Task", flash: flash, task: newTask})
 });
 
 app.post('/tasks', function(req, res) {
-  console.log(req.body.task)
-  var task = new Task({
-    task : req.body.task.task,
-    details : req.body.task.details
-  });
-  console.log("In /tasks.post: task:", task)
-  console.log("In /tasks.post: task:.task", task.task)
-  console.log("In /tasks.post: task:.details", task.details)
+  var task = createTask(req.body.task.task, req.body.task.details);
   task.save(function(err) {
     console.log("In save: err:",err);
     if (!err) {
@@ -94,13 +97,15 @@ app.post('/tasks', function(req, res) {
     }
     else {
       req.flash('warning', err);
-      res.redirect('/tasks/new')
+      req.flash('newTask', task);
+      res.redirect('/tasks/new');
     }
   });
 });
 
 app.get('/tasks/:id/edit', function(req, res) {
-  Task.findById(req.params.id, function(err, doc) {
+  var handleDoc = function(err, doc) {
+    console.log("handleDoc: doc:", doc);
     if (doc) {
       res.render('tasks/edit', {
         title: 'Edit Task View',
@@ -110,8 +115,19 @@ app.get('/tasks/:id/edit', function(req, res) {
     } else {
       req.flash('warning', "Could not find a task with an id of " + req.params.id);
       res.redirect('/tasks');
-    }
-  });
+    }    
+  }
+
+  var task = req.flash('editedTask')[0]
+  
+  if (task) {
+    task = new Task(task);
+    handleDoc(null, task);
+  } else {
+    Task.findById(req.params.id, function(err, doc) {
+      handleDoc(err, doc);
+    });
+  }
 });
 
 app.put('/tasks/:id', function(req, res) {
@@ -124,6 +140,7 @@ app.put('/tasks/:id', function(req, res) {
         res.redirect('/tasks');
       } else {
         req.flash('warning', err);
+        req.flash('editedTask', doc);
         res.redirect('/tasks/' + req.params.id + "/edit");
       }
     });
